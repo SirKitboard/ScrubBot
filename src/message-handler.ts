@@ -43,13 +43,15 @@ export default class MessageHandler {
 					if (foundPattern !== undefined) {
 						const logChannel = message.guild?.channels.cache.get(server.log_channel);
 						if (logChannel && logChannel.type === "text") {
+							const messageChannel = message.guild?.channels.cache.get(message.channel.id);
 							const response = new Discord.MessageEmbed().setURL(message.url)
 								.setAuthor(message.author.username, message.author.avatarURL() as string)
 								.setTitle("Message matched pattern!")
 								.setColor("#00bac0")
 								.addFields(
 									{ name: "Message Body", value: message.content },
-									{ name: "Patten found", value: foundPattern},
+									{ name: "Matched Pattern", value: foundPattern},
+									{ name: "Posted to", value: `${messageChannel?.name}`},
 									{ name: "Message permalink", value: message.url},
 								)
 								.setTimestamp();
@@ -75,7 +77,7 @@ export default class MessageHandler {
 			let foundIndex = 0;
 			for (const patternPart of patternParts) {
 				if (foundIndex === -1) {
-					return;
+					break;
 				} else {
 					foundIndex = message.content.indexOf(patternPart, foundIndex);
 					if (foundIndex !== -1) {
@@ -109,21 +111,11 @@ export default class MessageHandler {
 
 	private async handleCommand(message: Discord.Message, server: Server) {
 		const messageSegments = message.content.split(" ");
-		const command = messageSegments[1];
+		const command = messageSegments.length > 1 ? messageSegments[1] : "";
 		const args = messageSegments.slice(2);
 		let result: any;
 		try {
 			switch (command) {
-				case "help":
-					message.channel.send("**All commands are prefixed with @ScrubBot**:\n" +
-					(server.log_channel ? `Current log channel: <#${server.log_channel}>\n` : "No log channel configured\n") +
-					"**Commands**:\n\n" +
-					"• **help** - Display this help message\n" +
-					"• **add-pattern|add_pattern** [pattern]- Add a pattern to look for, use * as the wildcard\n" +
-					"• **remove-pattern|remove_pattern** [pattern] - Remove a pattern\n" +
-					"• **list-patterns|list_patterns**- List current list of patterns the bot is searching for\n" +
-					"• **set_log_channel|set-log-channel** #[channel-name] - Set the channel where bot lists logged messages\n");
-					break;
 				case "add-pattern":
 				case "add_pattern":
 					if (args.length < 1) {
@@ -184,8 +176,17 @@ export default class MessageHandler {
 						}
 					}
 					break;
+				case "help":
 				default:
-					message.channel.send("Invalid command");
+						message.channel.send("**All commands are prefixed with @ScrubBot**:\n" +
+						(server.log_channel ? `Current log channel: <#${server.log_channel}>\n\n` : "No log channel configured\n\n") +
+						"**Commands**:\n" +
+						"• **help** - Display this help message\n" +
+						"• **add-pattern|add_pattern** [pattern]- Add a pattern to look for, use * as the wildcard\n" +
+						"• **remove-pattern|remove_pattern** [pattern] - Remove a pattern\n" +
+						"• **list-patterns|list_patterns**- List current list of patterns the bot is searching for\n" +
+						"• **set_log_channel|set-log-channel** #[channel-name] - Set the channel where bot lists logged messages\n");
+						break;
 			}
 		} catch (e) {
 			console.log(e);
