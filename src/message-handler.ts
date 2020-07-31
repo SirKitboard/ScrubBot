@@ -72,7 +72,7 @@ export default class MessageHandler {
 			// No patterns to find, return
 			return;
 		}
-		const lowercaseMessage = message.content.toLocaleLowerCase();
+		const lowercaseMessageContent = message.content.toLocaleLowerCase();
 		for (const pattern of server.patterns) {
 			const patternParts = pattern.split("*");
 			let foundIndex = 0;
@@ -80,7 +80,7 @@ export default class MessageHandler {
 				if (foundIndex === -1) {
 					break;
 				} else {
-					foundIndex = message.content.indexOf(patternPart, foundIndex);
+					foundIndex = lowercaseMessageContent.indexOf(patternPart, foundIndex);
 					if (foundIndex !== -1) {
 						foundIndex += patternPart.length;
 					}
