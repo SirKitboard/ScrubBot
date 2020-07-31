@@ -188,6 +188,7 @@ export default class MessageHandler {
 					message.channel.send("Invalid command");
 			}
 		} catch (e) {
+			console.log(e);
 			message.channel.send("Invalid command");
 		}
 	}

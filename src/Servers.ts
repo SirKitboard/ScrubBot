@@ -37,7 +37,7 @@ export default class Servers {
 	public static async addPattern(id: string, pattern: string): Promise<boolean> {
 		if (id in this.servers && this.servers[id].patterns?.indexOf(pattern) === -1) {
 			this.servers[id].patterns.push(pattern);
-			await MySQL.query("insert into patterns(server_id, pattern) VALUES(?, ?) ON DUPLICATE KEY SET 1 = 1", [id, pattern]);
+			await MySQL.query("insert into patterns(server_id, pattern) VALUES(?, ?) ON DUPLICATE KEY UPDATE server_id=server_id", [id, pattern]);
 			return true;
 		}
 		return false;
