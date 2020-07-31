@@ -72,6 +72,7 @@ export default class MessageHandler {
 			// No patterns to find, return
 			return;
 		}
+		const lowercaseMessage = message.content.toLocaleLowerCase();
 		for (const pattern of server.patterns) {
 			const patternParts = pattern.split("*");
 			let foundIndex = 0;
@@ -111,7 +112,7 @@ export default class MessageHandler {
 
 	private async handleCommand(message: Discord.Message, server: Server) {
 		const messageSegments = message.content.split(" ");
-		const command = messageSegments.length > 1 ? messageSegments[1] : "";
+		const command = messageSegments.length > 1 ? messageSegments[1].toLocaleLowerCase() : "";
 		const args = messageSegments.slice(2);
 		let result: any;
 		try {
