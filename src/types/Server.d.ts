@@ -1,6 +1,6 @@
 export interface Server {
     id: string,
     name: string,
-    logChannelID?: string,
-    patterns?: string[]
+    log_channel?: string,
+    patterns: string[]
 }

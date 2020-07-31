@@ -17,20 +17,48 @@ export default class Servers {
 			this.servers[result.id] = {
 				id: result.id,
 				name: result.name,
-				logChannelID: result.logChannelID,
-				patterns: patternMap[result.id],
+				log_channel: result.log_channel,
+				patterns: patternMap[result.id] || [],
 			};
 		}
 
 		console.log(this.servers);
 	}
 
-	public static add(id: string, name: string) {
+	public static async add(id: string, name: string) {
 		this.servers[id] = ({
 			id, name,
+			patterns: [],
 		});
 
-		MySQL.query("insert into servers(id, name) VALUES (?, ?)", [id, name]);
+		await MySQL.query("insert into servers(id, name) VALUES (?, ?)", [id, name]);
+	}
+
+	public static async addPattern(id: string, pattern: string): Promise<boolean> {
+		if (id in this.servers && this.servers[id].patterns?.indexOf(pattern) === -1) {
+			this.servers[id].patterns.push(pattern);
+			await MySQL.query("insert into patterns(server_id, pattern) VALUES(?, ?) ON DUPLICATE KEY SET 1 = 1", [id, pattern]);
+			return true;
+		}
+		return false;
+	}
+
+	public static async removePattern(id: string, pattern: string): Promise<boolean> {
+		if (id in this.servers && this.servers[id].patterns?.indexOf(pattern) !== -1) {
+			this.servers[id].patterns.splice(this.servers[id].patterns?.indexOf(pattern), 1);
+			await MySQL.query("delete from patterns where server_id = ? and pattern = ?", [id, pattern]);
+			return true;
+		}
+		return false;
+	}
+
+	public static async setLogChannel(id: string, logChannelID: string): Promise<boolean> {
+		if (id in this.servers) {
+			this.servers[id].log_channel = logChannelID;
+			await MySQL.query("update servers set log_channel = ? where id = ?", [logChannelID, id]);
+			return true;
+		}
+		return false;
 	}
 
 	public static get(id: string) {
